@@ -1,0 +1,62 @@
+stages:
+  - stage: 'Helm'
+    jobs:
+    - job: Helm
+      pool: Default
+      steps:
+
+      - task: AzureCLI@2
+        displayName: GetApp5Id
+        inputs:
+          azureSubscription: 'OS_fra_connection'
+          scriptType: ps
+          scriptLocation: inlineScript
+          inlineScript: |
+            $CLIENTIDVALUE=az identity show --ids /subscriptions/2f74d028-3bdd-4dee-8881-3570fef53e19/resourceGroups/fraport/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-app5 --query clientId
+            Write-Host "ClientID of App5 is $CLIENTIDVALUE"
+            Write-Host "##vso[task.setvariable variable=CLIENTID;]$CLIENTIDVALUE"
+
+      - task: HelmInstaller@1
+        displayName: Helm installer
+        inputs: 
+          helmVersionToInstall: latest
+      - task: KubectlInstaller@0
+        displayName: Kubectl installer
+        inputs: 
+          kubectlVersion: latest
+      - task: KubeloginInstaller@0
+        inputs:
+          kubeloginVersion: 'latest'
+      - task: HelmDeploy@0
+        displayName: Helm Deploy
+        inputs:
+          azureSubscription: 'OS_fra_connection'
+          azureContainerRegistry: 349875498hrijwe
+          azureResourceGroupForACR: fraport
+          azureSubscriptionForACR: 'OS_fra_connection'
+          azureResourceGroup: fraport
+          connectionType: 'Azure Resource Manager'
+          namespace: app5
+          useClusterAdmin: true
+          KubernetesCluster: fradev-aks
+          command: upgrade
+          install: true
+          chartType: FilePath
+          chartPath: charts/workloadIdApp2
+          releaseName: app5
+          arguments: --set nameOverride=workloadidapp5,azureWorkloadIdentity.tenantId=27fafc60-141e-40ac-9157-4eb4fe0383db,azureWorkloadIdentity.clientId=$(CLIENTID),keyvaultName=rjlk4325432655-kv,secretName=arbitrarySecretWrong -n app5 --create-namespace
+
+      - task: AzureCLI@2
+        displayName: GetSecretValueFromApplication
+        inputs:
+          azureSubscription: 'OS_fra_connection'
+          scriptType: ps
+          scriptLocation: inlineScript
+          inlineScript: |
+            $creds = az aks get-credentials --resource-group fraport --name fradev-aks --overwrite-existing
+            $login = kubelogin convert-kubeconfig -l azurecli
+            
+            $APP5POD=kubectl get pod -n app5 -o=jsonpath='{.items[0].metadata.name}'
+            write-host "##[error] Getting a mounted secret from App5"
+            $Secret = kubectl exec -it $APP5POD -n app5 -- cat /mnt/secrets-store/arbitrarySecret
+            write-host "##[error] The value of arbitrary secret from KV mounted using Workload Identity in App5 is $Secret"

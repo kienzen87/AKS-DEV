@@ -1,0 +1,36 @@
+jobs:
+- job: applyTerraform
+  steps:
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Init'
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      backendServiceArm: 'OS-Fraport-Connection'
+      backendAzureRmResourceGroupName: 'fraport'
+      backendAzureRmStorageAccountName: 'fraportstorage'
+      backendAzureRmContainerName: 'fraportcontainer'
+      backendAzureRmKey: 'fraportdev.terraform.tfstate'
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+    inputs:
+      terraformVersion: 'latest'
+
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y graphviz
+    displayName: 'Install Graphviz'       # install the tool to use `dot` in command below
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'OS-Fraport-Connection'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        terraform graph -type=plan | dot -Tpng > $(Build.ArtifactStagingDirectory)/graph.png
+      workingDirectory: '$(System.DefaultWorkingDirectory)'  # i used default working directory for testing
+
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/graph.png'
+      artifact: 'test'
+      publishLocation: 'pipeline'

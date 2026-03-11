@@ -1,0 +1,37 @@
+jobs:
+- job: applyTerraform
+  steps:
+  
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
+    displayName: 'Install Terraform'
+    inputs:
+      terraformVersion: 'latest'
+
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Init'
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      backendServiceArm: 'OS_fra_connection'
+      backendAzureRmResourceGroupName: 'fraport'
+      backendAzureRmStorageAccountName: 'fraportstorage'
+      backendAzureRmContainerName: 'fraportcontainer'
+      backendAzureRmKey: 'fraportdev.terraform.tfstate'
+
+      
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Apply'
+    inputs:
+      provider: 'azurerm'
+      command: 'apply'
+      environmentServiceNameAzureRM: 'OS_fra_connection'
+
+  - task: AzureCLI@2
+    displayName: Clone Nginx Image and reboot Jumpserver
+    inputs:
+      azureSubscription: 'OS_fra_connection'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        az vm restart -g fraport -n Jumpserver-vm
+        az acr import --name 349875498hrijwe --source public.ecr.aws/mcr-public/nginx:1.17 --image nginx:latest --force
