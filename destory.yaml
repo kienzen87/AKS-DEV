@@ -20,10 +20,10 @@ stages:
           provider: 'azurerm'
           command: 'init'
           backendServiceArm: 'OS_fra_connection'
-          backendAzureRmResourceGroupName: 'fraport'
-          backendAzureRmStorageAccountName: 'fraportstorage'
-          backendAzureRmContainerName: 'fraportcontainer'
-          backendAzureRmKey: 'fraportdev.terraform.tfstate'
+          backendAzureRmResourceGroupName: 'company'
+          backendAzureRmStorageAccountName: 'companystorage'
+          backendAzureRmContainerName: 'companycontainer'
+          backendAzureRmKey: 'companydev.terraform.tfstate'
           
       - task: TerraformTaskV4@4
         displayName: 'Terraform Destroy'
@@ -41,7 +41,7 @@ stages:
           inline: |
 
             $PAT = "26swzs7bmqaw2ae26vy5ouyc7nedqpn2ix7rnltsscknqy7dd3pa"
-            $OrganizationName = "OS-Fraport-Dev"
+            $OrganizationName = "OS-company-Dev"
             $AgentPoolName = "Default"
             $ApiVersion = '5.1'
 

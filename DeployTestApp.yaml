@@ -12,7 +12,7 @@ stages:
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |
-            $CLIENTIDVALUE=az identity show --ids /subscriptions/2f74d028-3bdd-4dee-8881-3570fef53e19/resourceGroups/fraport/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-app5 --query clientId
+            $CLIENTIDVALUE=az identity show --ids /subscriptions/2f74d028-3bdd-4dee-8881-3570fef53e19/resourceGroups/company/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-app5 --query clientId
             Write-Host "ClientID of App5 is $CLIENTIDVALUE"
             Write-Host "##vso[task.setvariable variable=CLIENTID;]$CLIENTIDVALUE"
 
@@ -32,9 +32,9 @@ stages:
         inputs:
           azureSubscription: 'OS_fra_connection'
           azureContainerRegistry: 349875498hrijwe
-          azureResourceGroupForACR: fraport
+          azureResourceGroupForACR: company
           azureSubscriptionForACR: 'OS_fra_connection'
-          azureResourceGroup: fraport
+          azureResourceGroup: company
           connectionType: 'Azure Resource Manager'
           namespace: app5
           useClusterAdmin: true
@@ -53,7 +53,7 @@ stages:
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |
-            $creds = az aks get-credentials --resource-group fraport --name fradev-aks --overwrite-existing
+            $creds = az aks get-credentials --resource-group company --name fradev-aks --overwrite-existing
             $login = kubelogin convert-kubeconfig -l azurecli
             
             $APP5POD=kubectl get pod -n app5 -o=jsonpath='{.items[0].metadata.name}'

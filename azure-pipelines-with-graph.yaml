@@ -6,11 +6,11 @@ jobs:
     inputs:
       provider: 'azurerm'
       command: 'init'
-      backendServiceArm: 'OS-Fraport-Connection'
-      backendAzureRmResourceGroupName: 'fraport'
-      backendAzureRmStorageAccountName: 'fraportstorage'
-      backendAzureRmContainerName: 'fraportcontainer'
-      backendAzureRmKey: 'fraportdev.terraform.tfstate'
+      backendServiceArm: 'OS-company-Connection'
+      backendAzureRmResourceGroupName: 'company'
+      backendAzureRmStorageAccountName: 'companystorage'
+      backendAzureRmContainerName: 'companycontainer'
+      backendAzureRmKey: 'companydev.terraform.tfstate'
   - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
     inputs:
       terraformVersion: 'latest'
@@ -22,7 +22,7 @@ jobs:
 
   - task: AzureCLI@2
     inputs:
-      azureSubscription: 'OS-Fraport-Connection'
+      azureSubscription: 'OS-company-Connection'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |

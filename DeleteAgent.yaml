@@ -5,13 +5,13 @@ stages:
       steps:
       - task: AzurePowerShell@5
         inputs:
-          azureSubscription: 'OS-Fraport-Connection'
+          azureSubscription: 'OS-company-Connection'
           azurePowerShellVersion: LatestVersion
           ScriptType: 'InlineScript'
           inline: |
 
             $PAT = "26swzs7bmqaw2ae26vy5ouyc7nedqpn2ix7rnltsscknqy7dd3pa"
-            $OrganizationName = "OS-Fraport-Dev"
+            $OrganizationName = "OS-company-Dev"
             $AgentPoolName = "Default"
             $ApiVersion = '5.1'
 

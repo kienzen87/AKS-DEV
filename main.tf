@@ -4,7 +4,7 @@ data "azurerm_client_config" "current" {}
 resource "azurerm_virtual_network" "test" {
   address_space       = ["10.52.0.0/16"]
   name                = "test-vn"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
   location            = "germanywestcentral"
 }
 
@@ -12,7 +12,7 @@ resource "azurerm_virtual_network" "test" {
 resource "azurerm_subnet" "test" {
   address_prefixes                               = ["10.52.0.0/24"]
   name                                           = "test-sn"
-  resource_group_name                            = "fraport"
+  resource_group_name                            = "company"
   virtual_network_name                           = azurerm_virtual_network.test.name
   enforce_private_link_endpoint_network_policies = true
 }
@@ -21,7 +21,7 @@ resource "azurerm_subnet" "test" {
 resource "azurerm_subnet" "aks" {
   address_prefixes                               = ["10.52.1.0/24"]
   name                                           = "aks-sn"
-  resource_group_name                            = "fraport"
+  resource_group_name                            = "company"
   virtual_network_name                           = azurerm_virtual_network.test.name
   enforce_private_link_endpoint_network_policies = true
 }
@@ -29,7 +29,7 @@ resource "azurerm_subnet" "aks" {
 # Azure basstion requires a subnet with a hardcoded name
 resource "azurerm_subnet" "AzureBastionSubnet" {
   name                 = "AzureBastionSubnet"
-  resource_group_name  = "fraport"
+  resource_group_name  = "company"
   virtual_network_name = azurerm_virtual_network.test.name
   address_prefixes     = ["10.52.2.0/24"]
 }
@@ -38,7 +38,7 @@ resource "azurerm_subnet" "AzureBastionSubnet" {
 resource "azurerm_public_ip" "pip" {
   name                = "public-ip"
   location            = "germanywestcentral"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
   allocation_method   = "Static"
   sku                 = "Standard"
 }
@@ -46,7 +46,7 @@ resource "azurerm_public_ip" "pip" {
 resource "azurerm_bastion_host" "bastion" {
   name                = "bastion"
   location            = "germanywestcentral"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
 
   ip_configuration {
     name                 = "configuration"
@@ -58,7 +58,7 @@ resource "azurerm_bastion_host" "bastion" {
 resource "azurerm_user_assigned_identity" "test" {
   location            = "germanywestcentral"
   name                = "aks-identity"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
 }
 
 resource "azurerm_role_assignment" "keyvaultreader" {
@@ -77,8 +77,8 @@ resource "azurerm_role_assignment" "dnszonecontributor" {
 module "aks" {
   source  = "Azure/aks/azurerm"
   version = "9.1.0"
-  resource_group_name = "fraport"
-  cluster_log_analytics_workspace_name = "fraportdevlawos"
+  resource_group_name = "company"
+  cluster_log_analytics_workspace_name = "companydevlawos"
   prefix = "fradev"
   role_based_access_control_enabled = "true"
   location = "germanywestcentral"
@@ -102,12 +102,12 @@ module "aks" {
 
 resource "azurerm_private_dns_zone" "aks" {
   name                = "privatelink.germanywestcentral.azmk8s.io"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "aks" {
   name                  = "aks"
-  resource_group_name   = "fraport"
+  resource_group_name   = "company"
   private_dns_zone_name = azurerm_private_dns_zone.aks.name
   virtual_network_id    = azurerm_virtual_network.test.id
 }
@@ -122,7 +122,7 @@ resource "random_string" "key_vault_prefix" {
 
 resource "azurerm_container_registry" "acr" {
   name                = "349875498hrijwe"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
   location            = "germanywestcentral"
   sku                 = "Premium"
 }
@@ -138,7 +138,7 @@ resource "azurerm_role_assignment" "role_assignment_aks_acr" {
 resource "azurerm_key_vault" "kv" {
   location                    = "germanywestcentral"
   name                        = "rjlk4325432655-kv"
-  resource_group_name         = "fraport"
+  resource_group_name         = "company"
   sku_name                    = "premium"
   tenant_id                   = var.azure_tenant_id
   enabled_for_disk_encryption = true
@@ -165,12 +165,12 @@ azurerm_role_assignment.terraformsp-keyvaultadmin
 
 resource "azurerm_private_dns_zone" "kv" {
   name                = "privatelink.vaultcore.azure.net"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "akv" {
   name                  = "test"
-  resource_group_name   = "fraport"
+  resource_group_name   = "company"
   private_dns_zone_name = azurerm_private_dns_zone.kv.name
   virtual_network_id    = azurerm_virtual_network.test.id
 }
@@ -178,7 +178,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "akv" {
 resource "azurerm_private_endpoint" "kv_private_endpoint" {
   name                = lower("${azurerm_key_vault.kv.name}-ep")
   location            = "germanywestcentral"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
   subnet_id           = azurerm_subnet.test.id
  
   private_dns_zone_group {
@@ -197,7 +197,7 @@ resource "azurerm_private_endpoint" "kv_private_endpoint" {
 resource "azurerm_network_interface" "vm" {
   name                = "jumpserver-nic"
   location            = "germanywestcentral"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
 
   ip_configuration {
     name                          = "testconfiguration1"
@@ -208,7 +208,7 @@ resource "azurerm_network_interface" "vm" {
 
 resource "azurerm_windows_virtual_machine" "jumpserver" {
   name                = "Jumpserver-vm"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
   location            = "germanywestcentral"
   size                = "Standard_F2"
   admin_username      = "adminuser"
@@ -251,7 +251,7 @@ data "template_file" "ADDS" {
     # for_each    = local.scripts_to_execute
     template    = "${file("windows-agent-install.ps1")}"
     vars = {
-        URL     =   "https://dev.azure.com/OS-Fraport-Dev/"   
+        URL     =   "https://dev.azure.com/OS-company-Dev/"   
         PAT     =   "26swzs7bmqaw2ae26vy5ouyc7nedqpn2ix7rnltsscknqy7dd3pa"
         POOL    =   "Default"   
         AGENT   =   "Jumpserver-vm"
@@ -296,12 +296,12 @@ resource "azurerm_role_assignment" "aks-rbac_cluster_admin" {
 resource "azurerm_user_assigned_identity" "app5" {
   location            = "germanywestcentral"
   name                = "id-app5"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
 }
 
 resource "azurerm_federated_identity_credential" "app5" {
   name                = "id-app5"
-  resource_group_name = "fraport"
+  resource_group_name = "company"
   audience            = ["api://AzureADTokenExchange"]
   issuer              = module.aks.oidc_issuer_url
   parent_id           = azurerm_user_assigned_identity.app5.id

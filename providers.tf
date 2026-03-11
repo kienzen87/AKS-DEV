@@ -8,9 +8,9 @@ provider "azurerm" {
 
 terraform {
   backend "azurerm" {
-    storage_account_name = "fraportstorage"
-    container_name       = "fraportcontainer"
-    key                  = "fraportdev.terraform.tfstate"
+    storage_account_name = "companystorage"
+    container_name       = "companycontainer"
+    key                  = "companydev.terraform.tfstate"
     access_key            = "Mnd00QKs0OA5chj6bIJKCwXsndvFr9KvBuheeTOYEeialHFB+7RhTM/RzI1Ih6bd1dgMjNX4EgAh+AStoBiQHQ=="
   }
 }
